@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<title>JS Quicksort</title>
+<meta charset = "utf-8">
+<button type="button"  onclick="
+var quicksort = function (reihung) {
+    'use strict';
+    var i,
+        trennelement = reihung[0],
+        kleine = [ ],
+        grosse = [ ];
+    if (reihung.length <= 1) { return reihung; }
+    for (i = 1; i < reihung.length; i += 1) {
+        if (reihung[i] <= trennelement) {
+            kleine.push(reihung[i]);
+        } else {
+            grosse.push(reihung[i]);
+        }
+    }
+    kleine = quicksort(kleine);
+    grosse = quicksort(grosse);
+    return kleine.concat(trennelement, grosse);
+}; // Ende quicksort
+
+var liste = eval( prompt('Liste=?','[2,3,1]') );
+// Attention: eval is evil!
+alert( liste + ' -> ' + quicksort(liste) );
+"> Quicksorttest </button>

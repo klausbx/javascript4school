@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Registermaschine</title>
+    <meta content="Klaus Boettcher" name="author">
+
+<!-- //////////////////////////////////////////////////////// 
+     /// CSS-Style soll in eine Datei ausgelagert werden! ///
+     ////////////////////////////////////////////////////////-->    
+<style> 
+    textarea {
+    /*display: block; */
+    margin: 0.5em auto;
+    width: 98%; 
+    height: 15em;
+    overflow-y: auto;
+    font-size: 80%;
+    font-family: monospace;
+    background-color: #eeeedd;
+    box-shadow: 2px 2px 8px grey;
+    }
+    
+    #TA2 {
+    width: 15%;
+    }
+    
+    #TA1 {
+    width: 75%;
+    }
+    
+    button, fieldset, input {
+    font-size: 120%; 
+    border: 2px solid red; /* #C5D8E1; */
+    border-radius: 10px;
+    box-shadow: 2px 5px 20px grey;
+    }
+    
+    button {
+    background-color:lightgrey;
+    }
+</style>   
+    
+<script>
+"use strict";
+/////////////////////////////////////////////////////
+///// Funktionen zum Schreiben in Textareale      ///
+///// write, lies, lösch in eine Datei auslagern! ///
+/////////////////////////////////////////////////////
+
+var writeTA1 = function (text) {
+     document.getElementById("TA1").value += text;
+}
+
+var writeTA2 = function (text) {
+     document.getElementById("TA2").value += text;
+}
+
+var liesTA1 = function () {
+     return document.getElementById("TA1").value;
+}
+
+var liesTA2 = function () {
+     return document.getElementById("TA2").value;
+}
+
+var löschTA1 = function () {
+     document.getElementById("TA1").value = "";
+}
+
+var löschTA2 = function () {
+     document.getElementById("TA2").value = "";
+}
+
+document.writeln = function (text) {
+     document.getElementById("TA1").value+=text+"\n";
+}  
+
+///////////////////////////////////////////////
+///  ===== Registermaschinensimulator ====  ///
+///  Die Function registermaschine ist die  ///
+///         einzige globale Variable!       ///
+///////////////////////////////////////////////               
+
+var registermaschine = function (programm) {
+
+    // Zuerst sieben Variablen deklarieren
+    var akku = 0,
+        befehlsZaehler = 0,
+        daten = [0,0,0,0,0,0],
+        alu,
+        befehl,
+        timer,
+        timerAn = false;
+
+    if(!programm) {
+        programm = [ 
+        [0, 'ldk', 1],
+        [1, 'sta', 0],
+        [2, 'sta', 1],
+        [3, 'out', 0],
+        [3, 'add', 1],
+        [5, 'sta', 1],
+        [6, 'sub', 0],
+        [7, 'sta', 0],
+        [8, 'jmp', 3] ];
+        };
+
+
+    alu = {  // Ein Objekt aus RM-Befehlen
+        ldk: function (argument) {
+            akku = argument;
+            befehlsZaehler += 1;},
+
+         lda: function (argument) {
+                  akku = daten[argument];
+                  befehlsZaehler += 1; },
+
+         sta: function (argument) {
+                  daten[argument] = akku;
+                  befehlsZaehler += 1; },
+
+         add: function (argument) {
+                  akku = akku + daten[argument];
+                  befehlsZaehler += 1; },
+
+         sub: function (argument) {
+                  akku -= daten[argument];
+                  befehlsZaehler += 1; },
+
+         hlt: function () {
+                   timerAn = false;
+                   },
+
+         inp: function (argument) {
+                  daten[argument] =
+                      prompt('Eingabe für Datenspeicher ' + argument, '');
+                  befehlsZaehler += 1; },
+
+         out: function (argument) {
+                  writeTA1('AUSGABE: ' + daten[argument] + '\n');
+                  befehlsZaehler += 1; },
+
+         jmp: function (argument) {
+                  befehlsZaehler = argument; },
+                   
+         jlz: function (argument) {
+                  if (akku < 0) {
+                      befehlsZaehler = argument;
+                  }
+                  else {
+                      befehlsZaehler += 1; } },
+                
+         jle: function (argument) {
+                if (akku <= 0) {
+                    befehlsZaehler = argument;
+             	} else
+             	{  befehlsZaehler += 1;
+             	} },
+
+         jgz: function (argument) {
+                  if (akku > 0) {
+                      befehlsZaehler = argument;
+                  } else { befehlsZaehler += 1; } },
+
+         jge: function (argument) {
+                  if (akku >= 0) {
+                      befehlsZaehler = argument;
+                  }
+                  else {
+                      befehlsZaehler += 1;
+                  } },
+
+         jez: function (argument) {
+                  if (akku === 0) {
+                      befehlsZaehler = argument;
+                  }
+                  else {
+                      befehlsZaehler += 1; }},
+
+         jnz: function (argument) {
+                  if (akku !== 0) {
+                      befehlsZaehler = argument;
+                  }
+                  else {
+                      befehlsZaehler += 1;
+                  }
+                  }
+         };
+///////////     Ende alu     /////////////////
+
+///////////  Die zentrale Funktion:  /////////
+     
+    var anzeigenUndAusführen = function () {
+        var befehlsname = programm[befehlsZaehler][1];
+        var argument = programm[befehlsZaehler][2];
+
+        writeTA1(  // anzeigen
+              befehlsZaehler + ': '
+            + befehlsname + ' ' + argument
+            + ' =>   [' + akku + '] '
+            + daten[0] + ' ' + daten[1] + ' '
+            + daten[2] + ' ' + daten[3] + '\n');
+        
+        alu[befehlsname](argument);
+        //* Befehl ausführen!
+    }
+
+///// einige Funktionen zur Steuerung //////////////
+
+    var ablauf = function (){
+        if(timerAn) anzeigenUndAusführen();
+        timer = setTimeout(function (){ablauf()},500);
+    };
+
+    var start = function () {
+        if (!timerAn)   {
+            timerAn = true;
+            ablauf();
+        }
+    };
+
+    var stop = function () {
+        clearTimeout(timer);
+        timerAn = false;
+    };
+
+    var laden = function () {
+        var zk = liesTA2(); // zk: Zeichenkette/String
+        var zk2 = zk.split('\n');
+	    var prog = [];
+	    for(var i = 0; i < zk2.length; i +=1) {
+	        prog.push( zk2[i].split(/ +/) );
+	    }
+
+        for(var k = 0; k < prog.length; k++) {
+	        // Zeile testen! Kommentare ermöglichen!?
+	        prog[k][2] = parseInt(prog[k][2], 10);
+	    }
+	    stop ();
+	    registermaschine(prog);
+    };
+
+    document.getElementById("step").onclick = anzeigenUndAusführen;
+    document.getElementById("start").onclick = start;
+    document.getElementById("stop").onclick = stop;
+    document.getElementById("laden").onclick = laden;
+
+    document.getElementById('TA1').value = '';
+    writeTA1("Nr: Befehl Argument => [Akku] Daten 0 1 2 3\n");
+}
+/////////////////////////////////////////////////////////////////
+/////////   Ende Registermaschinensimulator   ///////////////////
+///////////////////////////////////////////////////////////////// 
+</script>
+
+</head>  
+
+<body onload=" 
+löschTA1();
+writeTA2('0 ldk 1' + '\n'
+        +'1 sta 0' + '\n'
+        +'2 sta 1' + '\n'
+        +'3 out 0' + '\n'
+        +'3 add 1' + '\n'
+        +'5 sta 1' + '\n'
+        +'6 sub 0' + '\n'
+        +'7 sta 0' + '\n'
+        +'8 jmp 3' + '\n');
+registermaschine();
+
+">
+<!-- ============================================================== -->
+<h3>Registermaschine</h3> 
+ 
+
+<!-- 1. Textfenster TA1 ---------------------------------------------> 
+ <fieldset>
+   <textarea id="TA1" wrap="off" data-role="none"></textarea> 
+ 
+   <textarea id="TA2" wrap="off" data-role="none"></textarea> 
+<br>       
+<!-- === Knopf start ====================== --> 
+   <button type="button" id = "start"> start </button> 
+     
+<!-- === Knopf stop ====================== --> 
+   <button type="button" id = "stop"> stop </button>   
+
+<!-- === Knopf step ====================== --> 
+   <button type="button" id = "step"> step </button>        
+
+<!-- === Knopf reset ====================== --> 
+   <button type="button" 
+      onclick = "
+      location.reload(); // NICHT: registermaschine();
+      "> 
+   reset </button> 
+   
+<!-- === Knopf löschen ====================== --> 
+    <button style="background-color:yellow" type="button" 
+      onclick = "löschTA1()";
+    > löschen </button> 
+    
+
+<!-- === //// Knopf Programm laden  ///// ====================== --> 
+   <button type="button" id="laden">laden</button> 
+   
+<!-- === //// Knopf minimum  ///// ====================== --> 
+   <button type="button" id="programm1"
+      onclick = "
+      löschTA2(); 
+      writeTA2('0 inp 0\n1 inp 1\n2 lda 1\n3 ?\n4 ?\n5 ?\n6 ?\n7 ? 2\n8 out 2\n9 hlt 0'); "
+      >Minimum</button>         
+</fieldset>
+<pre>
+────────────────────────────────────────────────────────────────
+Befehl      Befehlszähler      Akkumulator         Datenspeicher
+================================================================
+lda &lt;Adr&gt;   Bz := Bz +1        Ak := dat(Adr)            -----
+ldk  Zahl   Bz := Bz +1        Ak := Zahl                -----
+sta &lt;Adr&gt;   Bz := Bz +1           -----           dat(Adr) := Ak
+add &lt;Adr&gt;   Bz := Bz +1        Ak := Ak + dat(Adr)       -----
+sub &lt;Adr&gt;   Bz := Bz +1        Ak := Ak - dat(Adr)       -----
+jmp &lt;Adr&gt;   Bz := Adr            ----                    -----
+jez &lt;Adr&gt;   Bz := Adr wenn Ak = 0 sonst Bz := Bz + 1     ----- 
+jne &lt;Adr&gt;   Bz := Adr wenn Ak ≠ 0 sonst Bz := Bz + 1     ----- 
+jlz &lt;Adr&gt;   Bz := Adr wenn Ak &lt; 0 sonst Bz := Bz + 1     ----- 
+jle &lt;Adr&gt;   Bz := Adr wenn Ak  &lt;= 0 sonst Bz := Bz + 1     ----- 
+jgz &lt;Adr&gt;   Bz := Adr wenn Ak.&gt; 0 sonst Bz := Bz + 1     ----- 
+jge &lt;Adr&gt;   Bz := Adr wenn Ak ≥ 0 sonst Bz := Bz + 1     -----
+inp &lt;Adr&gt;   Bz := Bz +1                         dat(Adr) := Zahl
+out &lt;Adr&gt;   Bz := Bz +1                         Ausgabe  := dat(Adr)
+hlt  0     Ende der Programmausführung                  -----
+----------------------------------------------------------------
+</pre>
+Aufgabe 1:<br>
+<br>a) Welche Zahlenfolge gibt das Programm aus? Nenne dat(0) Variable a und dat(1) b<br>
+und bilde eine gleichwertige Befehlssequenz.<br><br>
+b) Welche Zahlenfolge wird  durch folgende Befehlssequenz ausgegeben?<br>Übersetze in ein Registermaschinenprogramm.<br><br>
+0 a = 1;  1 b = 1;  2 out a;  3 out b;  4 a = a + b;  5 b = a + b;  6 goto 2
+<br><br>Aufgabe 2:<br>
+<br>Nach Drücken von "Minimum" erscheint ein unvollständiges Programmstück, mit dem das <br>Minimum zweier Eingaben in dat(0) und dat(1) ermittelt, nach dat(2) gebracht und ausgeben <br>wird. <br>
+Beachte: Dabei soll keine weitere Zeile eingefügt werden! - Was aber leicht
+möglich ist, <br>denn die Zeilennummern dienen nur als Kommentar und werden vom
+Interpreter überlesen.
+
+
+</body>
+</html>

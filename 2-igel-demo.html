@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset = "utf-8">
+    <title>Igel-Module Demo</title>
+    <meta content="Klaus Boettcher" name="author">
+    <script src="igel-module.js" type="text/javascript"></script>
+    <script>
+    var igel = igelModul();
+    var hase = igelModul();          
+    var nEck = function(anzahl) {
+       igel.richtung(0);
+       igel.stiftBreite(3);
+       igel.farbe = 'black';
+       var x = 900/anzahl;
+       igel.geheZu(300-x/2, 400);
+       var w = 360/anzahl;
+    
+       for(var i = 0; i < anzahl; i++) 
+           setTimeout(function() { 
+           igel.vor(x); 
+           igel.links(w);
+           }, 200*i)        
+    }
+
+    var rosette = function () {
+        //var rAlt = hase.getR();
+        hase.links(136);
+        hase.vor(400);
+        //console.log(rAlt+' ===> '+hase.getR());
+    }   
+  // Mit der Funktion igelModul werden beim Start (onload) zwei 
+  // vollkommen unabhängige Igel-Objekte igel und hase erzeugt. 
+    </script> 
+</head>
+  
+<body onload = "
+    igel.neu('bild1'); 
+    igel.hgFarbe('#ffffdd');
+    hase.neu('bild1');
+    hase.stiftFarbe('#ff0000');
+    hase.geheZu(500,400);
+    ">
+   
+<form name="form1" action="" >
+  <fieldset>Eckenzahl:
+    <input name="ecken" value="100" type="text" size="3" maxlength="3">
+  
+    <button type="button" onclick=" nEck(form1.ecken.value);  ">
+    Vieleck
+    </button>     
+    
+    <button type="button" onclick=" rosette();">
+    Rosette
+    </button>
+    
+    <button type="button" onclick="
+        igel.hgFarbe('#ffffdd');
+    ">
+    löschen
+    </button>
+  </fieldset>
+</form>
+<br>  <br>  
+<canvas id="bild1" height="600" width="600" 
+        style = "border: 2px solid black"> 
+Bild einer Igelgrafik
+</canvas> 
+</body>
+</html>

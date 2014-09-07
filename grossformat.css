@@ -1,0 +1,30 @@
+textarea {
+    /*display: block; */
+    margin: 0.5em auto;
+    width: 98%; 
+    height: 15em;
+    overflow-y: auto;
+    font-size: 80%;
+    font-family: monospace;
+    background-color: #eeeedd;
+    box-shadow: 2px 2px 8px grey;
+    }
+    
+    #TA2 {
+    width: 15%;
+    }
+    
+    #TA1 {
+    width: 75%;
+    }
+    
+    button, fieldset, input {
+    font-size: 120%; 
+    border: 2px solid red; /* #C5D8E1; */
+    border-radius: 10px;
+    box-shadow: 2px 5px 20px grey;
+    }
+    
+    button {
+    background-color:lightgrey;
+    }
